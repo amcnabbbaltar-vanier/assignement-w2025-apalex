@@ -6,19 +6,29 @@ public class AnimatorController : MonoBehaviour
 {
     private Animator animator;
     private CharacterMovement characterMovement;
+    private Rigidbody rb;
     public void Start()
     {
         animator = GetComponent<Animator>();
         characterMovement = GetComponent<CharacterMovement>();
-    }
-    public void LateUpdate()
-    {
-       UpdateAnimator();
+        rb = GetComponent<Rigidbody>();
     }
 
-    // TODO Fill this in with your animator calls
-    void UpdateAnimator()
+    public void Update()
     {
-        
+        animator.SetFloat("CharacterSpeed", rb.linearVelocity.magnitude);
+        animator.SetBool("IsGrounded", characterMovement.IsGrounded);
     }
+
+    //public void LateUpdate()
+    //{
+    //   UpdateAnimator();
+    //}
+
+    //// TODO Fill this in with your animator calls
+    //void UpdateAnimator()
+    //{
+    //    animator.SetFloat("CharacterSpeed", rb.linearVelocity.magnitude);
+    //    animator.SetBool("IsGrounded", characterMovement.IsGrounded);
+    //}
 }
