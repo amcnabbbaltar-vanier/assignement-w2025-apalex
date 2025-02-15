@@ -48,13 +48,16 @@ public class Pause : MonoBehaviour
 
     public void Restart()
     {
-
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        isPaused = false;
     }
 
     public void QuitToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(0);
+        isPaused = false;
     }
 
 }
