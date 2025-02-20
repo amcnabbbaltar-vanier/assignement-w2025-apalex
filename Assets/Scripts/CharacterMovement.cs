@@ -12,7 +12,7 @@ public class CharacterMovement : MonoBehaviour
 
     // ============================== Jump Settings =================================
     [Header("Jump Settings")]
-    [SerializeField] private float jumpForce = 5f;        // Jump force applied to the character
+    [SerializeField] public float jumpForce = 5f;        // Jump force applied to the character
     [SerializeField] private float groundCheckDistance = 1.1f; // Distance to check for ground contact (Raycast)
     public bool doubleJump;
 

@@ -18,6 +18,7 @@ public class AnimatorController : MonoBehaviour
     {
         animator.SetFloat("CharacterSpeed", rb.linearVelocity.magnitude);
         animator.SetBool("IsGrounded", characterMovement.IsGrounded);
+        animator.SetBool("IsDoubleJump", characterMovement.doubleJump);
     }
 
     //public void LateUpdate()
