@@ -16,6 +16,12 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 1.1f; // Distance to check for ground contact (Raycast)
     public bool doubleJump;
 
+    // ============================== Health & Respawn ==============================
+    [Header("Fall Settings")]
+    [SerializeField] private float fallThreshold = -10f;  // Y coordinate for falling off the map
+    [SerializeField] private Vector3 respawnPoint = new Vector3(0, 1, 0);  // Respawn position
+    private bool isRespawning = false;
+
     // ============================== Modifiable from other scripts ==================
     public float speedMultiplier = 1.0f; // Additional multiplier for character speed ( WINK WINK )
 
@@ -62,6 +68,7 @@ public class CharacterMovement : MonoBehaviour
     private void Update()
     {
         RegisterInput(); // Collect player input
+        CheckForFall();
     }
 
     /// <summary>
@@ -212,5 +219,36 @@ public class CharacterMovement : MonoBehaviour
 
         // Apply the new velocity directly
         rb.linearVelocity = newVelocity;
+    }
+
+    private void CheckForFall()
+    {
+        if (!isRespawning && transform.position.y < fallThreshold)
+        {
+            Respawn();
+        }
+    }
+
+
+    private void Respawn()
+    {
+        if (isRespawning) return; // Prevent multiple calls
+
+        isRespawning = true; // Set cooldown
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.TakeDamage();
+        }
+
+        transform.position = respawnPoint;
+        rb.linearVelocity = Vector3.zero;
+
+        // Reset the flag after a delay
+        Invoke(nameof(ResetRespawnFlag), 1f);
+    }
+
+    private void ResetRespawnFlag()
+    {
+        isRespawning = false;
     }
 }

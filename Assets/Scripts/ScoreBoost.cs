@@ -38,7 +38,7 @@ public class ScoreBoost : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            GameManager gameManager = FindObjectOfType<GameManager>();
+            GameManager gameManager = FindFirstObjectByType<GameManager>();
             if (gameManager != null)
             {
                 gameManager.score += scoreValue; // Add score
