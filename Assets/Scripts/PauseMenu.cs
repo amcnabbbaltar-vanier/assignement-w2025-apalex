@@ -49,6 +49,13 @@ public class Pause : MonoBehaviour
     public void Restart()
     {
         Time.timeScale = 1f;
+
+        // Reset game values
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.health = 3;
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         isPaused = false;
     }

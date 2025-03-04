@@ -1,21 +1,29 @@
 using UnityEngine;
+using System.Collections;
 
 public class JumpBoost : MonoBehaviour
 {
     [Header("Boost Settings")]
-    [SerializeField] private float jumpMultiplier = 1.3f; // How much to multiply jump force
-    [SerializeField] private float boostDuration = 30f; // How long the boost lasts
+    [SerializeField] private float jumpMultiplier = 1.3f;
+    [SerializeField] private float boostDuration = 30f;
+    [SerializeField] private float respawnTime = 5f;
 
     [Header("Hover & Rotate Settings")]
-    [SerializeField] private float rotationSpeed = 50f; // Rotation speed
-    [SerializeField] private float hoverSpeed = 2f; // Speed of hovering movement
-    [SerializeField] private float hoverHeight = 0.5f; // Height of hover movement
+    [SerializeField] private float rotationSpeed = 50f;
+    [SerializeField] private float hoverSpeed = 2f;
+    [SerializeField] private float hoverHeight = 0.5f;
 
     private Vector3 startPosition;
+    private ParticleSystem pickupParticles;
+    private Renderer objectRenderer;
+    private Collider objectCollider;
 
     private void Start()
     {
-        startPosition = transform.position; // Store initial position
+        startPosition = transform.position;
+        pickupParticles = GetComponentInChildren<ParticleSystem>();
+        objectRenderer = GetComponent<Renderer>();
+        objectCollider = GetComponent<Collider>();
     }
 
     private void Update()
@@ -37,7 +45,7 @@ public class JumpBoost : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player")) // Make sure the player has the "Player" tag
+        if (other.CompareTag("Player"))
         {
             CharacterMovement playerMovement = other.GetComponent<CharacterMovement>();
 
@@ -45,17 +53,43 @@ public class JumpBoost : MonoBehaviour
             {
                 StartCoroutine(ApplyJumpBoost(playerMovement));
             }
-            Destroy(gameObject);
+
+            if (pickupParticles != null)
+            {
+                GameObject particleEffect = new GameObject("JumpBoostEffect");
+                particleEffect.transform.position = transform.position;
+
+                ParticleSystem newParticles = Instantiate(pickupParticles, particleEffect.transform);
+                newParticles.Play();
+
+                Destroy(particleEffect, newParticles.main.duration + newParticles.main.startLifetime.constantMax);
+            }
+
+            StartCoroutine(RespawnJumpBoost());
         }
     }
 
-    private System.Collections.IEnumerator ApplyJumpBoost(CharacterMovement playerMovement)
+    private IEnumerator ApplyJumpBoost(CharacterMovement playerMovement)
     {
-        float originalJumpForce = playerMovement.jumpForce; // Store original jump force
-        playerMovement.jumpForce *= jumpMultiplier; // Apply boost
+        float originalJumpForce = playerMovement.jumpForce;
+        playerMovement.jumpForce *= jumpMultiplier;
+        playerMovement.SetJumpBoost(true);
 
-        yield return new WaitForSeconds(boostDuration); // Wait for duration
+        yield return new WaitForSeconds(boostDuration);
 
-        playerMovement.jumpForce = originalJumpForce; // Reset jump force
+        playerMovement.jumpForce = originalJumpForce;
+        playerMovement.SetJumpBoost(false);
+    }
+
+    private IEnumerator RespawnJumpBoost()
+    {
+        objectRenderer.enabled = false;
+        objectCollider.enabled = false;
+
+        yield return new WaitForSeconds(respawnTime);
+
+        transform.position = startPosition;
+        objectRenderer.enabled = true;
+        objectCollider.enabled = true;
     }
 }

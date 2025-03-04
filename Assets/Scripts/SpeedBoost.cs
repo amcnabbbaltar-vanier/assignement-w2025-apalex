@@ -6,17 +6,24 @@ public class SpeedBoost : MonoBehaviour
     [Header("Boost Settings")]
     public float speedIncrease = 1.5f;
     public float duration = 5f;
+    public float respawnTime = 5f;
 
     [Header("Hover & Rotate Settings")]
-    [SerializeField] private float rotationSpeed = 50f; // Rotation speed
-    [SerializeField] private float hoverSpeed = 2f; // Speed of hovering movement
-    [SerializeField] private float hoverHeight = 0.5f; // Height of hover movement
+    [SerializeField] private float rotationSpeed = 50f;
+    [SerializeField] private float hoverSpeed = 2f;
+    [SerializeField] private float hoverHeight = 0.5f;
 
     private Vector3 startPosition;
+    private ParticleSystem pickupParticles;
+    private Renderer objectRenderer;
+    private Collider objectCollider;
 
     private void Start()
     {
-        startPosition = transform.position; // Store initial position
+        startPosition = transform.position;
+        pickupParticles = GetComponentInChildren<ParticleSystem>();
+        objectRenderer = GetComponent<Renderer>();
+        objectCollider = GetComponent<Collider>();
     }
 
     private void Update()
@@ -45,7 +52,19 @@ public class SpeedBoost : MonoBehaviour
             {
                 StartCoroutine(ApplySpeedBoost(movement));
             }
-            Destroy(gameObject);
+
+            if (pickupParticles != null)
+            {
+                GameObject particleEffect = new GameObject("SpeedBoostEffect");
+                particleEffect.transform.position = transform.position;
+
+                ParticleSystem newParticles = Instantiate(pickupParticles, particleEffect.transform);
+                newParticles.Play();
+
+                Destroy(particleEffect, newParticles.main.duration + newParticles.main.startLifetime.constantMax);
+            }
+
+            StartCoroutine(RespawnSpeedBoost());
         }
     }
 
@@ -60,5 +79,17 @@ public class SpeedBoost : MonoBehaviour
         {
             movement.speedMultiplier = originalMultiplier;
         }
+    }
+
+    private IEnumerator RespawnSpeedBoost()
+    {
+        objectRenderer.enabled = false;
+        objectCollider.enabled = false;
+
+        yield return new WaitForSeconds(respawnTime);
+
+        transform.position = startPosition;
+        objectRenderer.enabled = true;
+        objectCollider.enabled = true;
     }
 }

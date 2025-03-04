@@ -61,6 +61,8 @@ public class GameManager : MonoBehaviour
 
     private void GameOver()
     {
+        // Restart
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        health = 3;
     }
 }

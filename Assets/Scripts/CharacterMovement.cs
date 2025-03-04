@@ -15,6 +15,8 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] public float jumpForce = 5f;        // Jump force applied to the character
     [SerializeField] private float groundCheckDistance = 1.1f; // Distance to check for ground contact (Raycast)
     public bool doubleJump;
+    private bool hasJumpBoost = false;
+    private ParticleSystem doubleJumpParticles;
 
     // ============================== Health & Respawn ==============================
     [Header("Fall Settings")]
@@ -60,6 +62,11 @@ public class CharacterMovement : MonoBehaviour
     private void Awake()
     {
         InitializeComponents(); // Initialize Rigidbody and Camera reference
+    }
+
+    private void Start()
+    {
+        doubleJumpParticles = GetComponent<ParticleSystem>();
     }
 
     /// <summary>
@@ -175,14 +182,26 @@ public class CharacterMovement : MonoBehaviour
             {
                 rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             }
-            else if (doubleJump) // Double jump
+            else if (doubleJump && hasJumpBoost) // Allow double jump only if Jump Boost is active
             {
+                doubleJumpParticles.Play();
                 rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
-                doubleJump = false; // Disable double jump after use
+                doubleJump = false;
             }
 
-            jumpRequest = false; // Reset jump request
+            jumpRequest = false;
+            Invoke(nameof(StopDoubleJumpParticles), 0.8f);
         }
+    }
+
+    private void StopDoubleJumpParticles()
+    {
+        doubleJumpParticles.Stop();
+    }
+
+    public void SetJumpBoost(bool state)
+    {
+        hasJumpBoost = state;
     }
 
     /// <summary>

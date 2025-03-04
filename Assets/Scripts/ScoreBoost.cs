@@ -3,18 +3,24 @@ using UnityEngine;
 public class ScoreBoost : MonoBehaviour
 {
     [Header("Hover & Rotate Settings")]
-    [SerializeField] private float rotationSpeed = 50f; // Speed of rotation
-    [SerializeField] private float hoverSpeed = 2f; // Speed of hovering movement
-    [SerializeField] private float hoverHeight = 0.5f; // Height of hover movement
+    [SerializeField] private float rotationSpeed = 50f;
+    [SerializeField] private float hoverSpeed = 2f;
+    [SerializeField] private float hoverHeight = 0.5f;
 
     [Header("Score Settings")]
-    [SerializeField] private int scoreValue = 50; // Score to add
+    [SerializeField] private int scoreValue = 50;
 
     private Vector3 startPosition;
+    private ParticleSystem pickupParticles;
+    private Renderer objectRenderer;
+    private Collider objectCollider;
 
     private void Start()
     {
-        startPosition = transform.position; // Store initial position
+        startPosition = transform.position;
+        pickupParticles = GetComponentInChildren<ParticleSystem>();
+        objectRenderer = GetComponent<Renderer>();
+        objectCollider = GetComponent<Collider>();
     }
 
     private void Update()
@@ -41,9 +47,21 @@ public class ScoreBoost : MonoBehaviour
             GameManager gameManager = FindFirstObjectByType<GameManager>();
             if (gameManager != null)
             {
-                gameManager.score += scoreValue; // Add score
+                gameManager.score += scoreValue;
             }
-            Destroy(gameObject); // Destroy after pickup
+
+            if (pickupParticles != null)
+            {
+                GameObject particleEffect = new GameObject("ScoreBoostEffect");
+                particleEffect.transform.position = transform.position;
+
+                ParticleSystem newParticles = Instantiate(pickupParticles, particleEffect.transform);
+                newParticles.Play();
+
+                Destroy(particleEffect, newParticles.main.duration + newParticles.main.startLifetime.constantMax);
+            }
+
+            Destroy(gameObject);
         }
     }
 }
