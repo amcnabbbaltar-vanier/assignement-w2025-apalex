@@ -6,18 +6,15 @@ using UnityEngine.EventSystems;
 
 public class Pause : MonoBehaviour
 {
-
     [SerializeField] GameObject pauseMenu;
     public static bool isPaused;
     
-    // Start is called before the first frame update
     void Start()
     {
         pauseMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(null);
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -25,7 +22,8 @@ public class Pause : MonoBehaviour
             if (isPaused)
             {
                 UnPauseGame();
-            } else
+            }
+            else
             {
                 PauseGame();
             }
@@ -37,6 +35,9 @@ public class Pause : MonoBehaviour
         pauseMenu.SetActive(true);
         Time.timeScale = 0f;
         isPaused = true;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void UnPauseGame()
@@ -44,27 +45,35 @@ public class Pause : MonoBehaviour
         pauseMenu.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void Restart()
     {
-        Time.timeScale = 1f;
-
-        // Reset game values
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.health = 3;
+            GameManager.Instance.health = 3; // Reset health
+            GameManager.Instance.RespawnPlayer(); // Teleport player to the correct spawn point
         }
-
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        isPaused = false;
+        UnPauseGame();
     }
 
     public void QuitToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(0);
-        isPaused = false;
-    }
 
+        // Ensure the cursor is visible and unlocked before loading the menu
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Destroy GameManager instance before loading the main menu
+        if (GameManager.Instance != null)
+        {
+            Destroy(GameManager.Instance.gameObject);
+        }
+
+        SceneManager.LoadScene(0);
+    }
 }

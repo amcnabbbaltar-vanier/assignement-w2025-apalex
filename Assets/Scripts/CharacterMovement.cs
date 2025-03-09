@@ -1,5 +1,6 @@
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))] // Ensures that a Rigidbody component is attached to the GameObject
 public class CharacterMovement : MonoBehaviour
@@ -20,7 +21,7 @@ public class CharacterMovement : MonoBehaviour
 
     // ============================== Health & Respawn ==============================
     [Header("Fall Settings")]
-    [SerializeField] private float fallThreshold = -10f;  // Y coordinate for falling off the map
+    [SerializeField] private float fallThreshold = -5f;  // Y coordinate for falling off the map
     [SerializeField] private Vector3 respawnPoint = new Vector3(0, 1, 0);  // Respawn position
     private bool isRespawning = false;
 
@@ -248,7 +249,6 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-
     private void Respawn()
     {
         if (isRespawning) return; // Prevent multiple calls
@@ -259,15 +259,43 @@ public class CharacterMovement : MonoBehaviour
             GameManager.Instance.TakeDamage();
         }
 
-        transform.position = respawnPoint;
-        rb.linearVelocity = Vector3.zero;
+        // Determine respawn point based on scene
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        if (currentSceneName == "Level1")
+        {
+            respawnPoint = new Vector3(0, 1, 0);
+        }
+        else if (currentSceneName == "Level2")
+        {
+            respawnPoint = new Vector3(27, 1, 0);
+        }
+        else if (currentSceneName == "Level3")
+        {
+            respawnPoint = new Vector3(0, 1, 0);
+        }
+        else
+        {
+            respawnPoint = new Vector3(0, 1, 0);
+        }
 
-        // Reset the flag after a delay
-        Invoke(nameof(ResetRespawnFlag), 1f);
+        // Disable physics temporarily to avoid issues
+        rb.isKinematic = true;
+        rb.linearVelocity = Vector3.zero; // Clear velocity
+        rb.angularVelocity = Vector3.zero; // Clear angular velocity
+
+        // Reset position safely
+        rb.MovePosition(respawnPoint);
+
+        // Re-enable physics after a short delay
+        Invoke(nameof(ResetPhysics), 0.1f);
     }
 
-    private void ResetRespawnFlag()
+    /// <summary>
+    /// Re-enables physics after respawning.
+    /// </summary>
+    private void ResetPhysics()
     {
+        rb.isKinematic = false;
         isRespawning = false;
     }
 }
