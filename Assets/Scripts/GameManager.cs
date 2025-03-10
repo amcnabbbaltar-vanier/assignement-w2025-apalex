@@ -82,8 +82,6 @@ public class GameManager : MonoBehaviour
 
     private Vector3 GetRespawnPoint()
     {
-        string sceneName = SceneManager.GetActiveScene().name;
-
         string currentSceneName = SceneManager.GetActiveScene().name;
         if (currentSceneName == "Level1")
         {

@@ -7,6 +7,7 @@ public class Portal : MonoBehaviour
     {
         if (other.CompareTag("Player")) // Ensure the player has the tag "Player"
         {
+            SceneManager.sceneLoaded += OnSceneLoaded; // Subscribe to scene load event
             LoadNextScene();
         }
     }
@@ -16,7 +17,6 @@ public class Portal : MonoBehaviour
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         int nextSceneIndex = currentSceneIndex + 1;
 
-        // Check if the next scene index is within bounds
         if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
         {
             SceneManager.LoadScene(nextSceneIndex);
@@ -25,5 +25,16 @@ public class Portal : MonoBehaviour
         {
             Debug.Log("No more scenes to load!");
         }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "EndMenu")
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        SceneManager.sceneLoaded -= OnSceneLoaded; // Unsubscribe to avoid memory leaks
     }
 }
